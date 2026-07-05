@@ -50,19 +50,38 @@ if modelo is None:
     st.stop()
 
 # ==========================================
-# Barra Lateral - Entrada de Datos del Cliente
+# Barra Lateral - Entrada de Datos del Cliente (En Español)
 # ==========================================
 st.sidebar.header("📋 Datos del Cliente")
 
 age = st.sidebar.slider("Edad", min_value=18, max_value=100, value=35)
-sex = st.sidebar.selectbox("Sexo", options=["female", "male"])
+
+# 1. Sexo: Mostrar en español, mapear a inglés
+sexo_opciones = {"Femenino": "female", "Masculino": "male"}
+sex_es = st.sidebar.selectbox("Sexo", options=list(sexo_opciones.keys()))
+sex = sexo_opciones[sex_es] # Guarda el valor en inglés para el modelo
+
 bmi = st.sidebar.slider("Índice de Masa Corporal (BMI)", min_value=15.0, max_value=60.0, value=28.5, step=0.1)
 children = st.sidebar.number_input("Número de hijos", min_value=0, max_value=10, value=1, step=1)
-smoker = st.sidebar.selectbox("¿Es Fumador?", options=["yes", "no"])
-region = st.sidebar.selectbox("Región", options=["southwest", "southeast", "northwest", "northeast"])
+
+# 2. Fumador: Mostrar en español, mapear a inglés
+fumador_opciones = {"Sí": "yes", "No": "no"}
+smoker_es = st.sidebar.selectbox("¿Es Fumador?", options=list(fumador_opciones.keys()))
+smoker = fumador_opciones[smoker_es] # Guarda el valor en inglés para el modelo
+
+# 3. Región: Mostrar en español, mapear a inglés
+region_opciones = {
+    "Suroeste (Southwest)": "southwest", 
+    "Sureste (Southeast)": "southeast", 
+    "Noroeste (Northwest)": "northwest", 
+    "Noreste (Northeast)": "northeast"
+}
+region_es = st.sidebar.selectbox("Región", options=list(region_opciones.keys()))
+region = region_opciones[region_es] # Guarda el valor en inglés para el modelo
+
 charges = st.sidebar.number_input("Cargos Médicos Anuales ($)", min_value=100.0, max_value=100000.0, value=13000.0, step=500.0)
 
-# Crear DataFrame con el nuevo registro del cliente
+# El diccionario interno que va al modelo SE MANTIENE en inglés para que no falle el pipeline
 cliente_dict = {
     "age": age,
     "sex": sex,
@@ -152,8 +171,20 @@ with col2:
         st.info("Sube el archivo `insurance.csv` para habilitar las visualizaciones estadísticas de los clusters.")
 
 # ==========================================
-# Detalles del Cliente Ingresado
+# Detalles del Cliente Ingresado (Traducido al Español)
 # ==========================================
 st.markdown("---")
 st.subheader("📋 Resumen de datos enviados")
-st.dataframe(df_cliente)
+
+# Creamos una copia en español para mostrarla en la interfaz
+df_bonito = pd.DataFrame([{
+    "Edad": age,
+    "Sexo": sex_es,       
+    "BMI (IMC)": bmi,
+    "Hijos": children,
+    "Fumador": smoker_es,  
+    "Región": region_es,     
+    "Cargos Médicos": f"${charges:,.2f}"
+}])
+
+st.dataframe(df_bonito, use_container_width=True)
