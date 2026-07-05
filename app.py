@@ -77,13 +77,17 @@ df_cliente = pd.DataFrame([cliente_dict])
 # ==========================================
 # Procesamiento y Predicción
 # ==========================================
-# NOTA: K-means usualmente se entrena solo con variables numéricas escaladas 
-# (por ejemplo, age, bmi, charges). Ajusta esta lista según las variables usadas en tu Colab.
-variables_modelo = ["age", "bmi", "charges"] 
-datos_prediccion = df_cliente[variables_modelo]
+# El Pipeline espera TODAS las columnas del cliente en el orden o formato correcto
+datos_prediccion = df_cliente.copy()
 
-# Realizar la predicción del cluster
-cluster_asignado = int(modelo.predict(datos_prediccion)[0])
+# Realizar la predicción pasando el dataframe completo del cliente
+try:
+    cluster_asignado = int(modelo.predict(datos_prediccion)[0])
+except ValueError as e:
+    # En caso de que se necesite validar un orden específico de columnas
+    columnas_ordenadas = ["age", "sex", "bmi", "children", "smoker", "region", "charges"]
+    datos_prediccion = datos_prediccion[columnas_ordenadas]
+    cluster_asignado = int(modelo.predict(datos_prediccion)[0])
 
 # Mapear el nivel de riesgo en base a los criterios de tu notebook o metadata
 # Si tu metadata.json define los riesgos, los extraemos de ahí de forma dinámica
